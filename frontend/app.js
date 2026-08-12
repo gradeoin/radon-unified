@@ -1590,7 +1590,7 @@ function navigateToRoute(path, updateHistory = true) {
     if (loginOverlay) loginOverlay.style.display = 'none';
     if (appContainer) appContainer.style.display = 'none';
 
-    const isAuthed = auth && auth.currentUser;
+    const isAuthed = true; // Local mode: always authenticated
 
     if (cleanPath.includes('/about')) {
         const pageAbout = document.getElementById('pageAbout');
