@@ -1,0 +1,32 @@
+{
+  "_comment": "Radon Unified — Configuration. All API keys are optional.",
+  "port": 8080,
+
+  "gemini_api_keys": [],
+  "tavily_api_key": "",
+  "gnews_api_key": "",
+  "openrouter_api_key": "",
+
+  "gemini_web": {
+    "enabled": true,
+    "cookie_file": null,
+    "auth_user": null,
+    "xsrf_token": null,
+    "gemini_bl": "boq_assistant-bard-web-server_20260716.08_p0",
+    "proxy": null,
+    "retry_attempts": 3,
+    "retry_delay_sec": 2,
+    "request_timeout_sec": 180
+  },
+
+  "colibri": {
+    "enabled": false,
+    "binary_path": "",
+    "model_path": "",
+    "server_port": 8082,
+    "auto_start": true
+  },
+
+  "rate_limit": "30/minute",
+  "log_requests": true
+}

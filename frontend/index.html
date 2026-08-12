@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Apply saved theme before render to prevent flash -->
+    <script>try{var t=localStorage.getItem('radon_theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+    <title>Radon &mdash; AI Assistant</title>
+    <meta name="description" content="Radon: Precision AI assistant. Search, code, images, weather and more.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Favicons & App Icons -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' rx='6' fill='%2352525b'/%3E%3Cpath d='M7 5h9a5 5 0 0 1 0 10h-9V5Z' stroke='white' stroke-width='2.5' stroke-linejoin='round' fill='none'/%3E%3Cpath d='M7 15l8 8' stroke='white' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' rx='6' fill='%2352525b'/%3E%3Cpath d='M7 5h9a5 5 0 0 1 0 10h-9V5Z' stroke='white' stroke-width='2.5' stroke-linejoin='round' fill='none'/%3E%3Cpath d='M7 15l8 8' stroke='white' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+    <meta name="theme-color" content="#07070a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="/manifest.json">
+
+    <!-- Open Graph / Social Link Sharing SEO -->
+    <meta property="og:site_name" content="Radon">
+    <meta property="og:title" content="Radon &mdash; Personal AI Assistant">
+    <meta property="og:description" content="Precision AI assistant powered by Gemini. Real-time web search, Python execution, 8K FLUX image generation, and cross-thread memory.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="http://localhost:8080">
+    <meta property="og:image" content="https://radon-8mm.pages.dev/og-image.jpg">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Radon &mdash; Personal AI Assistant">
+    <meta name="twitter:description" content="Precision AI assistant powered by Gemini. Real-time web search, Python execution, image generation, and cross-thread memory.">
+    <meta name="twitter:image" content="https://radon-8mm.pages.dev/og-image.jpg">
+
+    <!-- Firebase (optional - disabled in local mode) -->
+    <!-- Remove these if you don't need cloud auth/sync -->
+    <!-- <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script> -->
+    <!-- <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script> -->
+    <!-- <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script> -->
+    <!-- <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script> -->
+
+    <!-- Markdown & Syntax Highlighting -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <!-- PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+    <!-- App Stylesheet -->
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+    <!-- Auth Loader -->
+    <div id="authLoader" class="auth-loader">
+        <div class="auth-loader-mark">
+            <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Outer ring that draws itself -->
+                <circle cx="26" cy="26" r="23" stroke="#52525b" stroke-width="1.5" stroke-dasharray="145" stroke-dashoffset="145" class="ring-anim" opacity="0.3"/>
+                <!-- R mark -->
+                <path d="M18 15h12a7 7 0 0 1 0 14H18V15Z" stroke="#52525b" stroke-width="2" stroke-linejoin="round" fill="none" stroke-dasharray="60" stroke-dashoffset="60" class="r-top-anim"/>
+                <path d="M18 29l12 8" stroke="#52525b" stroke-width="2" stroke-linecap="round" stroke-dasharray="15" stroke-dashoffset="15" class="r-leg-anim"/>
+            </svg>
+        </div>
+        <p class="auth-loader-text">Radon</p>
+    </div>
+
+    <!-- Login Screen — Claude AI minimalist aesthetic -->
+    <div id="loginOverlay" class="login-overlay" style="display: none;">
+        <div class="login-center">
+            <!-- Minimalist Logo Mark -->
+            <div class="login-brand-logo">
+                <svg width="44" height="44" viewBox="0 0 28 28" fill="none">
+                    <rect width="28" height="28" rx="8" fill="#f59e0b"/>
+                    <path d="M7 5h9a5 5 0 0 1 0 10H7V5Z" stroke="#000000" stroke-width="2.5" stroke-linejoin="round" fill="none"/>
+                    <path d="M7 15l8 8" stroke="#000000" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+            </div>
+
+            <h1 class="login-heading">Welcome to Radon</h1>
+            <p class="login-desc">Your personal AI for search, code, reasoning &amp; creation.</p>
+
+            <!-- Auth actions -->
+            <div class="login-actions">
+                <button id="loginBtn" class="login-google-btn">
+                    <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                    <span>Continue with Google</span>
+                </button>
+                <div class="login-divider"><span>OR</span></div>
+                <a href="/signup" class="login-email-btn router-link">Continue with Email</a>
+            </div>
+
+            <p class="login-terms">By continuing, you agree to Radon's <a href="/terms" class="router-link">Terms of Service</a> &amp; <a href="/privacy" class="router-link">Privacy Policy</a></p>
+            <a href="/" class="router-link" style="color: #a1a1aa; font-size: 0.85rem; text-decoration: none; margin-top: 16px; display: inline-block;">← Back to Product Home</a>
+        </div>
+    </div>
+
+    <!-- Mobile sidebar backdrop -->
+    <div id="mobileOverlay" class="mobile-overlay"></div>
+
+    <!-- Main App -->
+    <div class="app-container" style="display: none;" id="appContainer">
+
+        <!-- Mobile Header -->
+        <div class="mobile-header" id="mobileHeader">
+            <button id="hamburgerBtn" class="icon-btn" title="Menu">
+                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <div class="mobile-brand-title">
+                <div class="sidebar-wordmark-icon" style="width:20px;height:20px;border-radius:5px;">
+                    <svg width="12" height="12" viewBox="0 0 28 28" fill="none"><path d="M7 5h9a5 5 0 0 1 0 10H7V5Z" stroke="white" stroke-width="2.5" stroke-linejoin="round" fill="none"/><path d="M7 15l8 8" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
+                </div>
+                <span class="mobile-logo">Radon</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:2px;">
+                <button id="mobileShareBtn" class="icon-btn" title="Share Chat">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                </button>
+                <button id="newChatMobileBtn" class="icon-btn" title="New Chat">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+            </div>
+        </div>
+
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="header-top">
+                    <div class="sidebar-wordmark">
+                        <div class="sidebar-wordmark-icon">
+                            <svg width="14" height="14" viewBox="0 0 28 28" fill="none">
+                                <path d="M7 5h9a5 5 0 0 1 0 10H7V5Z" stroke="white" stroke-width="2.5" stroke-linejoin="round" fill="none"/>
+                                <path d="M7 15l8 8" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        Radon
+                    </div>
+                    <button id="newChatBtn" class="new-chat-btn" title="New Chat">
+                        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        New
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-content">
+                <div class="sidebar-search-box">
+                    <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none" class="search-box-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="searchThreadsInput" class="sidebar-search-input" placeholder="Search chats...">
+                </div>
+                <div id="threadsList" class="threads-list"></div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <img id="userAvatar" src="" alt="Avatar" class="avatar">
+                    <div class="user-details">
+                        <span id="userName" class="user-name">User</span>
+                        <span id="userEmail" class="user-email">user@example.com</span>
+                    </div>
+                </div>
+                <div class="footer-actions">
+                    <!-- Theme toggle -->
+                    <button id="themeToggleBtn" class="icon-btn theme-toggle-btn" title="Toggle theme">
+                        <svg id="themeIconDark" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" style="display:block">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                        </svg>
+                        <svg id="themeIconLight" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" style="display:none">
+                            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                        </svg>
+                    </button>
+                    <button id="settingsBtn" class="icon-btn" title="Settings">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    </button>
+                    <button id="logoutBtn" class="icon-btn" title="Sign out">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Chat Area -->
+        <main class="chat-area">
+            <!-- Desktop Header -->
+            <header class="chat-header">
+                <button id="desktopSidebarToggle" class="icon-btn" title="Toggle Sidebar">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                </button>
+
+                <div style="margin-left: auto; display: flex; align-items: center; gap: 10px;">
+                    <button id="proxyStatusBadge" class="proxy-status-badge offline" title="Desktop Proxy Status — Click for Setup">
+                        <span class="status-dot"></span>
+                        <span id="proxyStatusText" class="status-text">Radon Cloud</span>
+                    </button>
+                    <button id="shareChatBtn" class="icon-btn" title="Share Chat">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Ultra Minimal Welcome Screen -->
+            <div id="welcomeScreen" class="welcome-screen">
+                <h1 class="welcome-title" id="welcomeGreeting">What will you <span class="build-gradient-text">build</span> today?</h1>
+                <p class="welcome-sub" id="welcomeGreetingSub">Ask anything or start building a project.</p>
+            </div>
+
+            <!-- Messages -->
+            <div class="chat-history" id="chatHistory"></div>
+
+            <!-- Tool Activity -->
+            <div class="tool-activity" id="toolActivity" style="display: none;">
+                <div class="spinner"></div>
+                <span id="toolActivityText">Radon is thinking...</span>
+            </div>
+
+            <!-- Input -->
+            <div class="input-wrapper-outer">
+                <div class="input-container" id="inputContainer">
+                    <div id="pendingAttachments" class="pending-attachments" style="display: none;"></div>
+                    <div class="input-bar">
+                        <textarea id="userInput" placeholder="Ask Radon anything..." rows="1" inputmode="text" enterkeyhint="send"></textarea>
+                        <div class="input-bottom-tools">
+                            <div class="input-tools-left">
+                                <button id="uploadBtn" class="icon-btn" title="Attach File">
+                                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                                </button>
+                                <button id="voiceBtn" class="icon-btn" title="Voice Input">
+                                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                                </button>
+                            </div>
+                            <div class="input-tools-right">
+                                <!-- Model Selector -->
+                                <select id="modelSelector" class="model-selector-dropdown" title="Select AI Model" style="background:var(--input-bg,#1a1a27);color:var(--text-1,#f4f4f5);border:1px solid var(--border,#2a2a3a);border-radius:8px;padding:4px 8px;font-size:0.78rem;cursor:pointer;max-width:180px;">
+                                    <optgroup label="⚡ Gemini Web (Free)">
+                                        <option value="gemini-3.6-flash" selected>Gemini 3.6 Flash</option>
+                                        <option value="gemini-3.5-flash-thinking">Gemini Thinking (Deep)</option>
+                                        <option value="gemini-3.5-flash-thinking-lite">Gemini Thinking Lite</option>
+                                        <option value="gemini-flash-lite">Gemini Flash Lite</option>
+                                        <option value="gemini-auto">Gemini Auto</option>
+                                    </optgroup>
+                                    <optgroup label="🔑 Gemini API (Key Required)">
+                                        <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                                        <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite</option>
+                                    </optgroup>
+                                    <optgroup label="🖥️ Local (Colibri)">
+                                        <option value="glm-5.2" disabled>GLM-5.2 744B ⚙️ Setup Required</option>
+                                        <option value="inkling" disabled>Inkling 975B ⚙️ Setup Required</option>
+                                        <option value="deepseek-v4-flash" disabled>DeepSeek V4 284B ⚙️ Setup Required</option>
+                                        <option value="olmoe" disabled>OLMoE 7B ⚙️ Setup Required</option>
+                                    </optgroup>
+                                </select>
+                                <button id="sendBtn" class="send-btn" title="Send message">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Cursor/Claude Style Bottom Token Quota Progress Bar -->
+                    <div class="input-quota-bar">
+                        <div class="quota-item">
+                            <span class="quota-label" id="quotaSessionLabel">Session: 0%</span>
+                            <div class="quota-track">
+                                <div class="quota-fill" id="quotaSessionFill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                        <div class="quota-item">
+                            <div class="quota-track">
+                                <div class="quota-fill quota-fill-amber" id="quotaDailyFill" style="width: 0%;"></div>
+                            </div>
+                            <span class="quota-label" id="quotaDailyLabel">Daily: <span id="tokenCountText">0 / 100k Tokens</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Code Preview Modal -->
+    <div id="previewModal" class="preview-modal" style="display: none;">
+        <div class="preview-modal-content">
+            <div class="preview-modal-header">
+                <h3>Live Preview</h3>
+                <button id="closePreviewBtn" class="icon-btn" title="Close">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <iframe id="previewIframe" class="preview-iframe" sandbox="allow-scripts"></iframe>
+        </div>
+    </div>
+
+    <!-- Settings & Profile Modal -->
+    <div id="settingsModal" class="settings-modal-overlay" style="display: none;">
+        <div class="settings-modal-card">
+            <div class="settings-modal-header">
+                <h3>Settings & Profile</h3>
+                <button id="closeSettingsBtn" class="icon-btn" title="Close">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="settings-modal-body">
+                <div class="settings-nav">
+                    <button class="settings-tab-btn active" data-tab="tabProfile">Account & Profile</button>
+                    <button class="settings-tab-btn" data-tab="tabPrivacy">Privacy & Personalization</button>
+                    <button class="settings-tab-btn" data-tab="tabAppearance">Appearance</button>
+                    <button class="settings-tab-btn" data-tab="tabOutput">Output Preferences</button>
+                    <button class="settings-tab-btn" data-tab="tabModel">API Keys & Models</button>
+                    <button class="settings-tab-btn" data-tab="tabDev">Advanced Developer</button>
+                </div>
+                <div class="settings-panes">
+                    <!-- Account & Profile Tab -->
+                    <div id="tabProfile" class="settings-pane active">
+                        <div class="settings-profile-header">
+                            <img id="settingsAvatar" class="settings-avatar-img" src="" alt="Profile">
+                            <div class="settings-profile-info">
+                                <h4 id="settingsNameText">Divyansh</h4>
+                                <p id="settingsEmailText">user@example.com</p>
+                            </div>
+                        </div>
+                        <div class="settings-form-group">
+                            <label for="prefNameInput">Preferred Display Name</label>
+                            <input type="text" id="prefNameInput" class="settings-input" placeholder="e.g. Divyansh">
+                        </div>
+                        <div class="settings-form-group">
+                            <label for="prefRoleInput">User Bio / Status</label>
+                            <input type="text" id="prefRoleInput" class="settings-input" placeholder="e.g. Mechanical Engineering Student at RNSIT">
+                        </div>
+                    </div>
+
+                    <!-- Privacy & Personalization Tab -->
+                    <div id="tabPrivacy" class="settings-pane">
+                        <div class="settings-form-group">
+                            <label for="prefInstructions">Custom AI Instructions</label>
+                            <textarea id="prefInstructions" class="settings-textarea" placeholder="e.g. Keep code snippets clean and well-commented. Be concise and precise."></textarea>
+                        </div>
+                        <div class="settings-form-group">
+                            <label for="prefLongTermMemory">Long-Term Memory (Across All Chat Threads)</label>
+                            <textarea id="prefLongTermMemory" class="settings-textarea" style="min-height: 90px;" placeholder="e.g. User Name: Divyansh Agarwal. Student at RNS Institute of Technology (RNSIT)..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Model & Tokens Tab -->
+                    <div id="tabModel" class="settings-pane">
+                        <div class="settings-form-group">
+                            <label for="prefGeminiKey">Personal Gemini API Key (Optional)</label>
+                            <div class="api-key-input-wrapper">
+                                <input type="password" id="prefGeminiKey" class="settings-input api-key-input" placeholder="AIzaSy... (Personal Gemini Key)">
+                                <button type="button" class="toggle-key-btn" data-target="prefGeminiKey" title="Toggle Visibility">
+                                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </button>
+                            </div>
+                            <p class="settings-field-hint">Bring your own key from <a href="https://aistudio.google.com" target="_blank">Google AI Studio</a> for dedicated 15 RPM / 1M token quota.</p>
+                        </div>
+                        <div class="settings-form-group">
+                            <label for="prefEnableLocalProxy" class="toggle-label" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                                <span>Enable Local Desktop Proxy</span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="prefEnableLocalProxy" class="toggle-checkbox" checked disabled>
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </label>
+                            <p class="settings-field-hint" style="margin-top: 5px;">Required. Radon Assistant routes all traffic securely through your local desktop app.</p>
+                        </div>
+                        <div class="settings-form-group">
+                            <label for="prefLocalProxyUrl">Desktop Proxy URL</label>
+                            <input type="text" id="prefLocalProxyUrl" class="settings-input" placeholder="http://127.0.0.1:8081" value="http://127.0.0.1:8081">
+                        </div>
+                        <div class="settings-form-group">
+                            <label for="prefCustomSystemPrompt">Custom System Prompt Override</label>
+                            <textarea id="prefCustomSystemPrompt" class="settings-textarea" rows="5" placeholder="e.g. You are a Python expert. Always write type-annotated code. Prefer functional programming patterns. Answer all cooking questions enthusiastically.&#10;&#10;Leave blank to use the default Radon engineering persona."></textarea>
+                            <p style="font-size: 0.72rem; color: var(--text-3); margin-top: 4px;">⚡ These instructions are injected as <strong>highest priority</strong> at the end of Radon's system prompt — they override the default engineering persona for any topic or style you want.</p>
+                        </div>
+                        <div class="settings-form-group">
+                            <label for="prefImageEngine">AI Image Generation Model</label>
+                            <select id="prefImageEngine" class="settings-select">
+                                <option value="flux">FLUX Engine (Ultra 8K Photorealistic - Default)</option>
+                                <option value="pollinations">Pollinations Standard Engine</option>
+                            </select>
+                        </div>
+                        <div class="token-stats-card">
+                            <div class="token-stats-header">
+                                <span>Daily Token Usage</span>
+                                <span id="tokenPercentText">0%</span>
+                            </div>
+                            <div class="token-bar-bg"><div id="tokenBarFill" class="token-bar-fill" style="width: 0%;"></div></div>
+                            <p id="tokenUsageSub" class="token-sub-text">0 tokens used today of 100,000 daily limit.</p>
+                        </div>
+
+                        <!-- Step-by-Step API Key Setup Guide -->
+                        <div class="api-guide-card">
+                            <div class="api-guide-header">
+                                <span>📖 Step-by-Step API Key Setup Guide</span>
+                                <span class="api-guide-badge">Zero Cost</span>
+                            </div>
+                            <div class="api-guide-sections">
+                                <details class="api-guide-item" open>
+                                    <summary><strong>1. Google Gemini Key</strong> (Get dedicated 15 RPM / 1M token quota)</summary>
+                                    <ol class="api-guide-steps">
+                                        <li>Visit <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a> and sign in with your Google account.</li>
+                                        <li>Click <strong>"Get API Key"</strong> in top left → <strong>"Create API Key"</strong>.</li>
+                                        <li>Copy your key (starts with <code>AIzaSy...</code>).</li>
+                                        <li>Paste it into <strong>"Personal Gemini API Key"</strong> above &amp; click <strong>Save Settings</strong>.</li>
+                                    </ol>
+                                    <p class="api-guide-note">⚡ <strong>Benefit:</strong> Gives you your own dedicated, private free tier quota so you never hit shared traffic rate limits.</p>
+                                </details>
+
+                                <details class="api-guide-item">
+                                    <summary><strong>2. OpenRouter Key</strong> (For DeepSeek R1, V3, Qwen 2.5 &amp; Copilot)</summary>
+                                    <ol class="api-guide-steps">
+                                        <li>Visit <a href="https://openrouter.ai/keys" target="_blank">openrouter.ai/keys</a> and sign up for free.</li>
+                                        <li>Click <strong>"Create Key"</strong> and copy your key (starts with <code>sk-or-v1-...</code>).</li>
+                                        <li>Paste it into <strong>"OpenRouter API Key"</strong> above &amp; click <strong>Save Settings</strong>.</li>
+                                    </ol>
+                                    <p class="api-guide-note">⚡ <strong>Benefit:</strong> Direct native access to DeepSeek R1 reasoning, Qwen 2.5 Coder 32B, and Microsoft Phi-4 without fallback delays.</p>
+                                </details>
+
+                                <details class="api-guide-item">
+                                    <summary><strong>3. Multi-Key Rotation in Cloudflare Worker</strong> (For Self-Hosters)</summary>
+                                    <ol class="api-guide-steps">
+                                        <li>Go to <a href="https://dash.cloudflare.com" target="_blank">Cloudflare Dashboard</a> → Workers &amp; Pages → <code>radon-backend</code>.</li>
+                                        <li>Go to <strong>Settings → Variables &amp; Secrets</strong>.</li>
+                                        <li>Edit <code>GEMINI_API_KEY</code> secret and paste multiple keys separated by commas:<br><code>AIzaKey1...,AIzaKey2...,AIzaKey3...</code></li>
+                                        <li>Click <strong>Save and Deploy</strong>.</li>
+                                    </ol>
+                                    <p class="api-guide-note">⚡ <strong>Benefit:</strong> Worker automatically round-robins requests across all keys, multiplying total free capacity to 30 RPM, 45 RPM, or 60 RPM!</p>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Appearance Tab -->
+                    <div id="tabAppearance" class="settings-pane">
+                        <div class="settings-form-group">
+                            <label>Accent Theme Color</label>
+                            <div class="theme-picker-grid">
+                                <button class="theme-option active" data-theme="amber"><span class="dot dot-amber"></span> Warm Amber</button>
+                                <button class="theme-option" data-theme="titanium"><span class="dot dot-titanium"></span> Titanium White</button>
+                                <button class="theme-option" data-theme="emerald"><span class="dot dot-emerald"></span> Cyber Emerald</button>
+                                <button class="theme-option" data-theme="violet"><span class="dot dot-violet"></span> Electric Violet</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Output Preferences Tab -->
+                    <div id="tabOutput" class="settings-pane">
+                        <div class="settings-form-group">
+                            <label for="prefExportFormat">Default Export Format</label>
+                            <select id="prefExportFormat" class="settings-select">
+                                <option value="html" selected>HTML Only (Modern Standalone - Default)</option>
+                                <option value="markdown">Markdown Standard</option>
+                                <option value="latex">LaTeX Document Format</option>
+                                <option value="json">JSON Raw Format</option>
+                            </select>
+                        </div>
+                        <div class="settings-form-group">
+                            <div class="toggle-option-row">
+                                <div>
+                                    <span class="toggle-label-title">Auto-Align Code & Layout</span>
+                                    <p class="toggle-label-sub">Automatically aligns code blocks, standardizes table widths, and auto-scrolls responses.</p>
+                                </div>
+                                <label class="switch-toggle">
+                                    <input type="checkbox" id="prefAutoAlign" checked>
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="settings-form-group">
+                            <div class="toggle-option-row">
+                                <div>
+                                    <span class="toggle-label-title">Smooth UI & Motion Animations</span>
+                                    <p class="toggle-label-sub">Enables micro-animations, glass glows, and fluid tab transitions.</p>
+                                </div>
+                                <label class="switch-toggle">
+                                    <input type="checkbox" id="prefEnableAnimations" checked>
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Developer Tab -->
+                    <div id="tabDev" class="settings-pane">
+                        <div class="settings-danger-zone">
+                            <h4>Data Management & Developer Options</h4>
+                            <div class="danger-btns-row">
+                                <button id="exportDataBtn" class="sec-action-btn">Export All Chats (JSON)</button>
+                                <button id="clearAllHistoryBtn" class="danger-action-btn">Clear All Threads</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-modal-footer">
+                <button id="saveSettingsBtn" class="save-settings-btn">Save Preferences</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="settings-modal-overlay" style="display: none;">
+        <div class="settings-modal-card" style="max-width: 460px;">
+            <div class="settings-modal-header">
+                <h3>Share Conversation</h3>
+                <button id="closeShareBtn" class="icon-btn" title="Close">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="settings-modal-body" style="flex-direction: column; padding: 20px; min-height: auto;">
+                <p style="font-size: 0.82rem; color: var(--text-3); margin-bottom: 14px;">Share a link or export this conversation thread.</p>
+                <div class="share-link-box">
+                    <input type="text" id="shareUrlInput" readonly class="settings-input" style="font-size: 0.8rem;" value="">
+                    <button id="copyShareLinkBtn" class="save-settings-btn" style="padding: 8px 14px; font-size: 0.78rem;">Copy</button>
+                </div>
+                <div class="share-options-grid">
+                    <button id="copyTranscriptBtn" class="sec-action-btn share-opt-btn">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        <span>Copy Transcript</span>
+                    </button>
+                    <button id="exportMarkdownBtn" class="sec-action-btn share-opt-btn">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <span>Export Markdown</span>
+                    </button>
+                    <button id="nativeShareBtn" class="sec-action-btn share-opt-btn">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                        <span>Share Sheet</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DEDICATED FULL-PAGE VIEWS (SPA ROUTER) -->
+
+    <!-- 0. Clean Setup Download Landing Page (/) -->
+    <div id="pageHome" class="page-view" style="display: none; background: #09090b; min-height: 100vh; color: #f4f4f5; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; flex-direction: column; align-items: center; justify-content: space-between; box-sizing: border-box; text-align: center;">
+        
+        <!-- Header logo centered -->
+        <nav style="width: 100%; padding: 28px 24px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: #f59e0b; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(245,158,11,0.3);">
+                    <svg width="20" height="20" viewBox="0 0 28 28" fill="none"><path d="M7 5h9a5 5 0 0 1 0 10H7V5Z" stroke="#000000" stroke-width="3" stroke-linejoin="round" fill="none"/><path d="M7 15l8 8" stroke="#000000" stroke-width="3" stroke-linecap="round"/></svg>
+                </div>
+                <span style="font-weight: 700; font-size: 1.35rem; color: #ffffff; letter-spacing: -0.3px;">Radon AI</span>
+            </div>
+        </nav>
+
+        <!-- Center Container -->
+        <main style="max-width: 580px; width: 100%; margin: auto; padding: 20px 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; box-sizing: border-box;">
+            <h1 style="font-size: 3.4rem; font-weight: 800; color: #ffffff; letter-spacing: -0.04em; margin: 0 0 16px; line-height: 1.15;">
+                Radon AI Desktop
+            </h1>
+            
+            <p style="font-size: 1.15rem; color: #a1a1aa; line-height: 1.6; margin: 0 0 36px; font-weight: 400; max-width: 500px;">
+                Download and run the setup launcher to connect your local AI server and start chatting.
+            </p>
+
+            <!-- Single Download Card -->
+            <div style="background: #121215; border: 1px solid #27272a; border-radius: 16px; padding: 36px 28px; width: 100%; box-sizing: border-box; box-shadow: 0 12px 48px rgba(0,0,0,0.6); display: flex; flex-direction: column; align-items: center;">
+                <a href="/Radon-Setup-Windows-v3.0.zip" download style="padding: 18px 36px; font-size: 1.1rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: #ffffff; color: #09090b; border-radius: 10px; width: 100%; box-sizing: border-box;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Download Radon-Setup-Windows-v3.0.zip</span>
+                </a>
+                
+                <div style="display: flex; align-items: center; justify-content: center; gap: 14px; font-size: 0.82rem; color: #71717a; margin-top: 20px; font-weight: 500;">
+                    <span>🛡️ Clean ZIP Archive</span>
+                    <span>•</span>
+                    <span>⚡ 1-Click Launch</span>
+                    <span>•</span>
+                    <span>💻 Windows 10/11</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer centered -->
+        <footer style="width: 100%; text-align: center; padding: 24px; color: #52525b; font-size: 0.85rem; box-sizing: border-box;">
+            &copy; 2026 Radon AI • Created by Divyansh Agarwal (RNSIT)
+        </footer>
+    </div>
+
+    <!-- 1. Dedicated About Page (/about) -->
+    <div id="pageAbout" class="page-view" style="display: none;">
+        <nav class="public-nav">
+            <div class="public-nav-container">
+                <a href="/" class="public-logo-link router-link">
+                    <div class="sidebar-wordmark-icon" style="width:24px;height:24px;border-radius:6px;">
+                        <svg width="14" height="14" viewBox="0 0 28 28" fill="none"><path d="M7 5h9a5 5 0 0 1 0 10h-9V5Z" stroke="white" stroke-width="2.5" stroke-linejoin="round" fill="none"/><path d="M7 15l8 8" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
+                    </div>
+                    <span>Radon</span>
+                </a>
+                <div class="public-nav-links">
+                    <a href="/about" class="public-nav-link active router-link">About</a>
+                    <a href="/terms" class="public-nav-link router-link">Terms</a>
+                    <a href="/privacy" class="public-nav-link router-link">Privacy</a>
+                    <a href="/login" class="save-settings-btn router-link" style="padding: 6px 14px; text-decoration: none;">Sign In</a>
+                </div>
+            </div>
+        </nav>
+        <main class="page-content-wrapper">
+            <div class="page-hero">
+                <span class="hero-badge">Architecture & Engine</span>
+                <h1>Precision Intelligence for Modern Builders.</h1>
+                <p>Radon is built from the ground up as a cloud-native, context-aware AI platform for developers, researchers, and creators.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="fc-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+                    <h3>Live Web Retrieval</h3>
+                    <p>Powered by Tavily & GNews APIs to query current news, live stock prices, weather, and real-time events.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="fc-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+                    <h3>8K FLUX Image Engine</h3>
+                    <p>High-fidelity AI artwork and photorealistic image rendering powered by FLUX diffusion models.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="fc-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+                    <h3>Python Execution Sandbox</h3>
+                    <p>Execute math, data processing, and algorithms in sandboxed cloud environments with live console outputs.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="fc-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/></svg></div>
+                    <h3>Cross-Thread Memory</h3>
+                    <p>Persistent memory across conversation threads so Radon recognizes your background and preferences seamlessly.</p>
+                </div>
+            </div>
+        </main>
+        <footer class="public-footer">
+            <p>&copy; 2026 Radon AI. Built with Gemini, Cloudflare Workers & Firebase.</p>
+        </footer>
+    </div>
+
+    <!-- 2. Dedicated Terms of Service Page (/terms) -->
+    <div id="pageTerms" class="page-view" style="display: none;">
+        <nav class="public-nav">
+            <div class="public-nav-container">
+                <a href="/" class="public-logo-link router-link">
+                    <div class="sidebar-wordmark-icon" style="width:24px;height:24px;border-radius:6px;">
+                        <svg width="14" height="14" viewBox="0 0 28 28" fill="none"><path d="M7 5h9a5 5 0 0 1 0 10h-9V5Z" stroke="white" stroke-width="2.5" stroke-linejoin="round" fill="none"/><path d="M7 15l8 8" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
+                    </div>
+                    <span>Radon</span>
+                </a>
+                <div class="public-nav-links">
+                    <a href="/about" class="public-nav-link router-link">About</a>
+                    <a href="/terms" class="public-nav-link active router-link">Terms</a>
+                    <a href="/privacy" class="public-nav-link router-link">Privacy</a>
+                    <a href="/login" class="save-settings-btn router-link" style="padding: 6px 14px; text-decoration: none;">Sign In</a>
+                </div>
+            </div>
+        </nav>
+        <main class="page-content-wrapper">
+            <div class="doc-container">
+                <h1>Terms of Service</h1>
+                <p class="doc-updated">Effective Date: August 3, 2026</p>
+                
+                <section class="doc-block">
+                    <h2>1. Agreement to Terms</h2>
+                    <p>By accessing or using Radon, you agree to comply with and be bound by these Terms of Service. If you disagree with any part of the terms, you may not access the service.</p>
+                </section>
+                <section class="doc-block">
+                    <h2>2. Artificial Intelligence Content Disclaimer</h2>
+                    <p>Radon leverages advanced neural language and vision models. Responses generated by AI models are for informational and productivity assistance. Users remain responsible for validating critical code, financial data, and factual statements.</p>
+                </section>
+                <section class="doc-block">
+                    <h2>3. User Account Security</h2>
+                    <p>You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.</p>
+                </section>
+                <section class="doc-block">
+                    <h2>4. Acceptable Conduct</h2>
+                    <p>You agree not to attempt reverse-engineering, automated scraping, launching denial of service attacks, or submitting malicious prompts designed to bypass safety filters.</p>
+                </section>
+            </div>
+        </main>
+        <footer class="public-footer">
+            <p>&copy; 2026 Radon AI. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- 3. Dedicated Privacy Policy Page (/privacy) -->
+    <div id="pagePrivacy" class="page-view" style="display: none;">
+        <nav class="public-nav">
+            <div class="public-nav-container">
+                <a href="/" class="public-logo-link router-link">
+                    <div class="sidebar-wordmark-icon" style="width:24px;height:24px;border-radius:6px;">
+                        <svg width="14" height="14" viewBox="0 0 28 28" fill="none"><path d="M7 5h9a5 5 0 0 1 0 10h-9V5Z" stroke="white" stroke-width="2.5" stroke-linejoin="round" fill="none"/><path d="M7 15l8 8" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
+                    </div>
+                    <span>Radon</span>
+                </a>
+                <div class="public-nav-links">
+                    <a href="/about" class="public-nav-link router-link">About</a>
+                    <a href="/terms" class="public-nav-link router-link">Terms</a>
+                    <a href="/privacy" class="public-nav-link active router-link">Privacy</a>
+                    <a href="/login" class="save-settings-btn router-link" style="padding: 6px 14px; text-decoration: none;">Sign In</a>
+                </div>
+            </div>
+        </nav>
+        <main class="page-content-wrapper">
+            <div class="doc-container">
+                <h1>Privacy Policy</h1>
+                <p class="doc-updated">Effective Date: August 3, 2026</p>
+                
+                <section class="doc-block">
+                    <h2>1. Data Collection Philosophy</h2>
+                    <p>We believe your conversations are private. We collect minimal data necessary to deliver your chat history, user settings, and personalized AI responses.</p>
+                </section>
+                <section class="doc-block">
+                    <h2>2. No Data Selling or Ad Tracking</h2>
+                    <p>We do <strong>NOT</strong> sell your personal information, train public models on your private conversations, or share user data with advertising networks.</p>
+                </section>
+                <section class="doc-block">
+                    <h2>3. Storage & Encryption</h2>
+                    <p>Chat transcripts are stored in encrypted Google Firebase Firestore databases scoped strictly to your authenticated User ID. Shared chat links are mirrored only when you explicitly trigger the Share action.</p>
+                </section>
+                <section class="doc-block">
+                    <h2>4. Right to Deletion</h2>
+                    <p>You retain 100% control over your data. You can delete individual chats or clear your entire history at any time from the Settings menu.</p>
+                </section>
+            </div>
+        </main>
+        <footer class="public-footer">
+            <p>&copy; 2026 Radon AI. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- 4. Dedicated Sign Up Page (/signup) -->
+    <div id="pageSignup" class="page-view" style="display: none;">
+        <div class="standalone-auth-card">
+            <div class="login-brand" style="margin-bottom: 20px;">
+                <div class="login-brand-icon">
+                    <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><path d="M7 5h9a5 5 0 0 1 0 10h-9V5Z" stroke="white" stroke-width="2.2" stroke-linejoin="round" fill="none"/><path d="M7 15l8 8" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg>
+                </div>
+                <span>Radon</span>
+            </div>
+            <h2>Create Your Radon Account</h2>
+            <p style="color: var(--text-2); font-size: 0.88rem; margin-bottom: 24px;">Get started with precision AI, web search, and 8K image generation.</p>
+            
+            <form id="standaloneSignupForm" style="display:flex; flex-direction:column; gap:14px;">
+                <div class="settings-form-group">
+                    <label for="signupEmail">Email Address</label>
+                    <input type="email" id="signupEmail" class="settings-input" placeholder="name@example.com" required>
+                </div>
+                <div class="settings-form-group">
+                    <label for="signupPassword">Password</label>
+                    <input type="password" id="signupPassword" class="settings-input" placeholder="At least 6 characters" required minlength="6">
+                </div>
+                <p id="signupErrorMsg" style="color: var(--danger); font-size: 0.8rem; display: none;"></p>
+                <button type="submit" class="save-settings-btn" style="padding: 12px; font-size: 0.94rem;">Create Account</button>
+            </form>
+            <p style="font-size: 0.84rem; color: var(--text-3); margin-top: 20px; text-align: center;">
+                Already have an account? <a href="/login" class="router-link" style="color: var(--brand-light); text-decoration: underline;">Sign In</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Hidden file input -->
+    <input type="file" id="fileInput" style="display: none;" accept="image/*,.txt,.md,.pdf,.json,.js,.py,.html,.css,.csv">
+
+    <script src="/app.js"></script>
+
+    <!-- PWA: Service Worker Registration + iOS Install Banner -->
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+    }
+
+    // "Add to Home Screen" install prompt banner
+    let deferredInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        // Show the install banner after 30s or on next visit
+        setTimeout(showInstallBanner, 30000);
+    });
+
+    function showInstallBanner() {
+        if (!deferredInstallPrompt) return;
+        const banner = document.createElement('div');
+        banner.id = 'installBanner';
+        banner.innerHTML = `
+            <div style="display:flex;align-items:center;gap:12px;">
+                <svg width="32" height="32" viewBox="0 0 28 28"><rect width="28" height="28" rx="6" fill="#52525b"/><path d="M7 5h9a5 5 0 0 1 0 10H7V5Z" stroke="white" stroke-width="2.5" fill="none"/><path d="M7 15l8 8" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
+                <div>
+                    <div style="font-weight:600;font-size:0.9rem;">Install Radon</div>
+                    <div style="font-size:0.75rem;opacity:0.6;">Add to home screen for the best experience</div>
+                </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+                <button onclick="installApp()" style="flex:1;padding:8px 16px;background:#52525b;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:0.85rem;">Install</button>
+                <button onclick="document.getElementById('installBanner').remove()" style="padding:8px 16px;background:rgba(255,255,255,0.08);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:0.85rem;">Later</button>
+            </div>`;
+        banner.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:min(340px,calc(100vw - 32px));background:#111118;border:1px solid rgba(199,124,42,0.3);border-radius:16px;padding:16px;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.6);animation:slideUp 0.3s ease;font-family:Inter,sans-serif;color:#fff;';
+        document.body.appendChild(banner);
+    }
+
+    async function installApp() {
+        if (!deferredInstallPrompt) return;
+        deferredInstallPrompt.prompt();
+        const { outcome } = await deferredInstallPrompt.userChoice;
+        deferredInstallPrompt = null;
+        document.getElementById('installBanner')?.remove();
+    }
+    </script>
+</body>
+</html>
+
+
+
+
+
